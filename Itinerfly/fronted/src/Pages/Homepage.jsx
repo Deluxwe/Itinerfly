@@ -43,7 +43,7 @@ export default function HomePage() {
       {/* Tabs Salidas / Llegadas */}
       <div className="mode-bar">
         <div className="mode-toggle">
-          {[["departures","í»«","Salidas"],["arrivals","í»¬","Llegadas"]].map(([id,icon,label]) => (
+          {[["departures","Salidas"],["arrivals","Llegadas"]].map(([id,icon,label]) => (
             <button
               key={id}
               onClick={() => setMode(id)}
