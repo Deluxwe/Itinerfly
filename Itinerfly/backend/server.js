@@ -3,7 +3,6 @@ const cors    = require("cors");
 const helmet  = require("helmet");
 const morgan  = require("morgan");
 
-// Las rutas ahora apuntan a ./src/ (no a ../)
 const config = require("./src/config");
 const flightRoutes  = require("./src/routes/flightRoutes");
 const airlineRoutes = require("./src/routes/airlineRoutes");
@@ -20,9 +19,12 @@ app.use(cors({
   credentials:    true,
 }));
 app.use(express.json({ limit: "10kb" }));
-app.use(morgan(config.isDev ? "dev" : "combined"));
 
-// Health check — para verificar que el servidor está vivo
+// Solo mostrar logs si no estamos en test (evita ruido en los tests)
+if (config.nodeEnv !== "test") {
+  app.use(morgan("dev"));
+}
+
 app.get("/health", (req, res) => {
   res.json({
     status:    "ok",
@@ -35,26 +37,31 @@ app.get("/health", (req, res) => {
 
 app.use("/api/flights",  flightRoutes);
 app.use("/api/airlines", airlineRoutes);
-app.use("/api/routes",   airlineRoutes);
+// Fix: /api/routes apunta al controlador de rutas directamente, no al de airlines
+app.use("/api/routes",   require("./src/routes/routeRoutes"));
 app.use("/api/auth",     authRoutes);
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);
 
-app.listen(config.port, () => {
-  console.log("\n╔══════════════════════════════════════════╗");
-  console.log("║   ✈  JFK Itinerary — Backend API          ║");
-  console.log("╠════════════════════════════════════════════╣");
-  console.log(`║  Puerto   : ${config.port}                              ║`);
-  console.log(`║  Modo     : ${config.useMockData ? "MOCK (sin API key)    " : "LIVE FlightAware     "} ║`);
-  console.log(`║  Aeropuerto: ${config.airport.iata} / ${config.airport.icao}                   ║`);
-  console.log("╚════════════════════════════════════════════╝\n");
-  console.log(`  GET  http://localhost:${config.port}/health`);
-  console.log(`  GET  http://localhost:${config.port}/api/flights/departures`);
-  console.log(`  GET  http://localhost:${config.port}/api/flights/arrivals`);
-  console.log(`  GET  http://localhost:${config.port}/api/flights/AA101`);
-  console.log(`  GET  http://localhost:${config.port}/api/airlines`);
-  console.log(`  POST http://localhost:${config.port}/api/auth/login\n`);
-});
+// Solo arrancar el servidor si NO estamos en modo test
+// En tests, supertest levanta el servidor en memoria
+if (config.nodeEnv !== "test") {
+  app.listen(config.port, () => {
+    console.log("\n╔══════════════════════════════════════════╗");
+    console.log("║   ✈  JFK Itinerary — Backend API          ║");
+    console.log("╠════════════════════════════════════════════╣");
+    console.log(`║  Puerto   : ${config.port}                              ║`);
+    console.log(`║  Modo     : ${config.useMockData ? "MOCK (sin API key)    " : "LIVE FlightAware     "} ║`);
+    console.log(`║  Aeropuerto: ${config.airport.iata} / ${config.airport.icao}                   ║`);
+    console.log("╚════════════════════════════════════════════╝\n");
+    console.log(`  GET  http://localhost:${config.port}/health`);
+    console.log(`  GET  http://localhost:${config.port}/api/flights/departures`);
+    console.log(`  GET  http://localhost:${config.port}/api/flights/arrivals`);
+    console.log(`  GET  http://localhost:${config.port}/api/flights/AA101`);
+    console.log(`  GET  http://localhost:${config.port}/api/airlines`);
+    console.log(`  POST http://localhost:${config.port}/api/auth/login`);
+  });
+}
 
 module.exports = app;

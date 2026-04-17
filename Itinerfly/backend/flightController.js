@@ -112,7 +112,7 @@ async function getFlightDetail(req, res) {
     const { flightCode } = req.params;
 
     // Sanitizar: solo letras y números, entre 3 y 8 caracteres
-    const codigo = flightCode.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    const codigo = flightCode.replaceAll(/[^a-zA-Z0-9]/g, "").toUpperCase();
 
     if (codigo.length < 3 || codigo.length > 8) {
       return clientError(res, "Código de vuelo inválido.", 400);
@@ -135,7 +135,7 @@ async function getFlightDetail(req, res) {
 // ── Helper privado ───────────────────────────────────────────
 function esFechaValida(str) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
-  return !isNaN(new Date(str));
+  return !date.isNaN(new Date(str));
 }
 
 module.exports = { getDepartures, getArrivals, searchByLocation, getFlightDetail };
