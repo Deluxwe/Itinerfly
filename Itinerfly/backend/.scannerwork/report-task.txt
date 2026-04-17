@@ -2,5 +2,5 @@ projectKey=jfk-itinerary-backend
 serverUrl=http://localhost:9000
 serverVersion=26.4.0.121862
 dashboardUrl=http://localhost:9000/dashboard?id=jfk-itinerary-backend
-ceTaskId=5a7b3340-8c33-4108-911c-91ee036e400d
-ceTaskUrl=http://localhost:9000/api/ce/task?id=5a7b3340-8c33-4108-911c-91ee036e400d
+ceTaskId=a7085cbb-e86b-4ff8-8317-d425ecdba798
+ceTaskUrl=http://localhost:9000/api/ce/task?id=a7085cbb-e86b-4ff8-8317-d425ecdba798
