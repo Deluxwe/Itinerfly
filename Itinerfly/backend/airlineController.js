@@ -1,8 +1,3 @@
-// ============================================================
-// src/controllers/airlineController.js
-// Controlador para aerolíneas y rutas
-// ============================================================
-
 const flightService = require("../services/flightAwareService");
 const { success, serverError } = require("../utils/responseHelpers");
 

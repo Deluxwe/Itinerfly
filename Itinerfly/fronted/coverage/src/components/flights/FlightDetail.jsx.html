@@ -25,21 +25,21 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>0/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/25</span>
+                <span class='fraction'>0/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
@@ -142,16 +142,23 @@
 <a name='L77'></a><a href='#L77'>77</a>
 <a name='L78'></a><a href='#L78'>78</a>
 <a name='L79'></a><a href='#L79'>79</a>
-<a name='L80'></a><a href='#L80'>80</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -160,9 +167,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -222,23 +234,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React from "react";
-import { AIRLINES } from "../../data/mockData";
 import FlightStatusBadge from "./FlightStatusBadge";
 &nbsp;
-const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >fmtDT = (i</span>so) =&gt; <span class="cstat-no" title="statement not covered" >iso ? new Date(iso).toLocaleString("es-ES",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}) : "—";</span></span>
+const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >fmtDT = (i</span>so) =&gt; <span class="cstat-no" title="statement not covered" >iso</span></span>
+  ? new Date(iso).toLocaleString("es-ES",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",hour12:false})
+  : "—";
 &nbsp;
 function <span class="fstat-no" title="function not covered" >Row({</span> label, value, mono }) {
 <span class="cstat-no" title="statement not covered" >  return (</span>
     &lt;div className="detail-row"&gt;
       &lt;span className="detail-row__label"&gt;{label}&lt;/span&gt;
-      &lt;span className={`detail-row__value${mono?" mono":""}`}&gt;{value}&lt;/span&gt;
+      &lt;span className={`detail-row__value${mono?" mono":""}`}&gt;{value || "—"}&lt;/span&gt;
     &lt;/div&gt;
   );
 }
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >FlightDetail({</span> flight, onClose }) {
+export default function <span class="fstat-no" title="function not covered" >FlightDetail({</span> flight, airlineMap, onClose }) {
 <span class="cstat-no" title="statement not covered" >  if (!flight) <span class="cstat-no" title="statement not covered" >return null;</span></span>
-  const airline = <span class="cstat-no" title="statement not covered" >AIRLINES.<span class="fstat-no" title="function not covered" >find((a</span>)=&gt;<span class="cstat-no" title="statement not covered" >a.id===flight.airline);</span></span>
+  const alNombre = <span class="cstat-no" title="statement not covered" >airlineMap?.[flight.airlineId] || flight.airlineId || flight.airline || "—";</span>
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
     &lt;div className="detail-overlay" onClick={onClose}&gt;
       &lt;div className="detail-panel" <span class="fstat-no" title="function not covered" >onClick={(e</span>)=&gt;<span class="cstat-no" title="statement not covered" >e.stopPropagation()}</span>&gt;
@@ -247,54 +261,58 @@ export default function <span class="fstat-no" title="function not covered" >Fli
             &lt;div&gt;
               &lt;div className="detail-header__label"&gt;DETALLES DEL VUELO&lt;/div&gt;
               &lt;div className="detail-header__fn"&gt;{flight.flightNumber}&lt;/div&gt;
-              &lt;div className="detail-header__airline"&gt;{airline?.name||flight.airline}&lt;/div&gt;
+              &lt;div className="detail-header__airline"&gt;{alNombre}&lt;/div&gt;
             &lt;/div&gt;
             &lt;button className="detail-close-btn" onClick={onClose}&gt;×&lt;/button&gt;
           &lt;/div&gt;
           &lt;div className="detail-route"&gt;
             &lt;div style={{textAlign:"center"}}&gt;
-              &lt;div className="detail-route__iata"&gt;{flight.origin.iata}&lt;/div&gt;
-              &lt;div className="detail-route__city"&gt;{flight.origin.city}&lt;/div&gt;
+              &lt;div className="detail-route__iata"&gt;{flight.origin?.iata}&lt;/div&gt;
+              &lt;div className="detail-route__city"&gt;{flight.origin?.city}&lt;/div&gt;
             &lt;/div&gt;
             &lt;div className="detail-route__arrow"&gt;✈&lt;/div&gt;
             &lt;div style={{textAlign:"center"}}&gt;
-              &lt;div className="detail-route__iata"&gt;{flight.destination.iata}&lt;/div&gt;
-              &lt;div className="detail-route__city"&gt;{flight.destination.city}&lt;/div&gt;
+              &lt;div className="detail-route__iata"&gt;{flight.destination?.iata}&lt;/div&gt;
+              &lt;div className="detail-route__city"&gt;{flight.destination?.city}&lt;/div&gt;
             &lt;/div&gt;
           &lt;/div&gt;
         &lt;/div&gt;
+&nbsp;
         &lt;div className="detail-status-bar"&gt;
-          &lt;FlightStatusBadge status={flight.status} size="lg" /&gt;
-          {flight.status==="DELAYED"&amp;&amp;flight.delayMinutes&gt;0 &amp;&amp; &lt;span className="detail-delay-text"&gt;Retraso: +{flight.delayMinutes} min&lt;/span&gt;}
+          &lt;FlightStatusBadge status={flight.status} size="lg"/&gt;
+          {flight.status==="DELAYED" &amp;&amp; flight.delayMinutes&gt;0 &amp;&amp; (
+            &lt;span className="detail-delay-text"&gt;Retraso: +{flight.delayMinutes} min&lt;/span&gt;
+          )}
         &lt;/div&gt;
+&nbsp;
         &lt;div className="detail-map"&gt;
           &lt;div className="detail-map__icon"&gt;🗺️&lt;/div&gt;
           &lt;div className="detail-map__title"&gt;Mapa de trayectoria&lt;/div&gt;
-          &lt;div className="detail-map__note"&gt;{flight.origin.iata} → {flight.destination.iata}&lt;br/&gt;&lt;em&gt;Conectar react-leaflet + FlightAware API&lt;/em&gt;&lt;/div&gt;
+          &lt;div className="detail-map__note"&gt;
+            {flight.origin?.iata} → {flight.destination?.iata}&lt;br/&gt;
+            &lt;em&gt;Disponible con integración Leaflet + FlightAware&lt;/em&gt;
+          &lt;/div&gt;
         &lt;/div&gt;
+&nbsp;
         &lt;div className="detail-body"&gt;
           &lt;div className="detail-section"&gt;INFORMACIÓN OPERACIONAL — OACI&lt;/div&gt;
-          &lt;Row label="Número de vuelo"  value={flight.flightNumber} mono /&gt;
-          &lt;Row label="Aerolínea"        value={airline?.name||flight.airline} /&gt;
-          &lt;Row label="Aeronave"         value={flight.aircraft} /&gt;
-          &lt;Row label="Tipo de vuelo"    value={flight.type==="domestic"?"Nacional":"Internacional"} /&gt;
-          &lt;Row label="Origen"           value={`${flight.origin.iata} — ${flight.origin.city}`} /&gt;
-          &lt;Row label="Destino"          value={`${flight.destination.iata} — ${flight.destination.city}`} /&gt;
-          &lt;Row label="Hora programada"  value={fmtDT(flight.scheduledOut)} mono /&gt;
-          &lt;Row label="Hora estimada"    value={fmtDT(flight.estimatedOut)} mono /&gt;
-          &lt;Row label="Puerta"           value={flight.gate} mono /&gt;
-          &lt;Row label="Terminal"         value={flight.terminal} /&gt;
-          &lt;Row label="Matrícula"        value={flight.registration||"—"} mono /&gt;
-          &lt;Row label="Callsign"         value={flight.callsign||"—"} mono /&gt;
-          &lt;Row label="Altitud crucero"  value={flight.cruiseAltitudeFt?`${flight.cruiseAltitudeFt.toLocaleString()} ft`:"—"} mono /&gt;
-          &lt;Row label="Velocidad crucero" value={flight.cruiseSpeedKts?`${flight.cruiseSpeedKts} kts`:"—"} mono /&gt;
-          {airline &amp;&amp; &lt;&gt;
-            &lt;div className="detail-section"&gt;CONTACTO AEROLÍNEA&lt;/div&gt;
-            &lt;Row label="Teléfono asistencia" value={airline.phone} mono /&gt;
-            &lt;Row label="Terminal salidas"    value={airline.terminalDep} /&gt;
-            &lt;Row label="Terminal llegadas"   value={airline.terminalArr} /&gt;
-          &lt;/&gt;}
-          &lt;div className="detail-note"&gt;&lt;strong&gt;Nota:&lt;/strong&gt; Datos adicionales OACI (transponder, altitud en tiempo real) disponibles vía FlightAware API en el backend.&lt;/div&gt;
+          &lt;Row label="Número de vuelo"   value={flight.flightNumber} mono/&gt;
+          &lt;Row label="Aerolínea"         value={`${alNombre} (${flight.airlineId})`}/&gt;
+          &lt;Row label="Aeronave"          value={flight.aircraft}/&gt;
+          &lt;Row label="Tipo de vuelo"     value={flight.type==="domestic"?"Nacional":"Internacional"}/&gt;
+          &lt;Row label="Origen"            value={`${flight.origin?.iata} — ${flight.origin?.city}`}/&gt;
+          &lt;Row label="Destino"           value={`${flight.destination?.iata} — ${flight.destination?.city}`}/&gt;
+          &lt;Row label="Hora programada"   value={fmtDT(flight.scheduledOut)} mono/&gt;
+          &lt;Row label="Hora estimada"     value={fmtDT(flight.estimatedOut)} mono/&gt;
+          &lt;Row label="Puerta"            value={flight.gate}  mono/&gt;
+          &lt;Row label="Terminal"          value={flight.terminal}/&gt;
+          &lt;Row label="Matrícula"         value={flight.registration} mono/&gt;
+          &lt;Row label="Callsign"          value={flight.callsign}     mono/&gt;
+          &lt;Row label="Altitud crucero"
+            value={flight.cruiseAltitudeFt
+              ? `${Number(flight.cruiseAltitudeFt).toLocaleString()} ft` : "—"} mono/&gt;
+          &lt;Row label="Velocidad crucero"
+            value={flight.cruiseSpeedKts ? `${flight.cruiseSpeedKts} kts` : "—"} mono/&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -307,7 +325,7 @@ export default function <span class="fstat-no" title="function not covered" >Fli
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-21T01:59:31.095Z
+                at 2026-04-23T02:03:15.987Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

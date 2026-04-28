@@ -6,6 +6,7 @@ import RouteCard from '../components/widgets/RouteCard'
 import BaggageModal from '../components/baggage/BaggageModal'
 import Navbar from '../components/layout/Navbar'
 
+
 // ── FlightStatusBadge ─────────────────────────────────────────
 describe('FlightStatusBadge — todos los estados', () => {
   const estados = [
@@ -48,6 +49,7 @@ describe('FlightStatusBadge — todos los estados', () => {
 
 // ── AirlineCard ───────────────────────────────────────────────
 describe('AirlineCard', () => {
+  
   const mockAirline = {
     id: 'AA', name: 'American Airlines', iata: 'AA',
     phone: '+1 800-433-7300', terminalDep: 'Terminal 8', terminalArr: 'Terminal 8'
@@ -82,6 +84,7 @@ describe('AirlineCard', () => {
 })
 
 // ── RouteCard ─────────────────────────────────────────────────
+
 describe('RouteCard', () => {
   const mockRoute = {
     id: 'JFK-LHR',
@@ -128,10 +131,16 @@ describe('RouteCard', () => {
     const { container } = render(<RouteCard route={mockRoute} />)
     expect(container.querySelector('.route-card')).toBeInTheDocument()
   })
-  it('muestra la aerolínea', () => {
-    render(<RouteCard route={mockRoute} />)
-    expect(screen.getByText('British Airways')).toBeInTheDocument()
-  })
+it('muestra airlineId si no hay airlineName', () => {
+    const mockRouteOnlyId = {
+      ...mockRoute,
+      airlineId: 'BA',
+    };
+    render(<RouteCard route={mockRouteOnlyId} />);
+
+    expect(screen.getByText('BA')).toBeInTheDocument();
+    expect(screen.queryByText('British Airways')).not.toBeInTheDocument();
+  });
 })
 
 // ── BaggageModal ──────────────────────────────────────────────

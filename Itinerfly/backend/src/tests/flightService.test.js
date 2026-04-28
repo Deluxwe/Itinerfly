@@ -137,3 +137,5 @@ describe('searchByLocation', () => {
     expect((await service.searchByLocation('LHR', 'departures')).length).toBeGreaterThan(0)
   })
 })
+
+

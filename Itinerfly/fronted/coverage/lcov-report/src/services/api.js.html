@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.59% </span>
+                <span class="strong">85.36% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>35/37</span>
+                <span class='fraction'>35/41</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90.9% </span>
+                <span class="strong">90.47% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>20/22</span>
+                <span class='fraction'>19/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">92.85% </span>
+                <span class="strong">86.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>13/14</span>
+                <span class='fraction'>13/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.11% </span>
+                <span class="strong">84.21% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>32/34</span>
+                <span class='fraction'>32/38</span>
             </div>
         
             
@@ -148,7 +148,12 @@
 <a name='L83'></a><a href='#L83'>83</a>
 <a name='L84'></a><a href='#L84'>84</a>
 <a name='L85'></a><a href='#L85'>85</a>
-<a name='L86'></a><a href='#L86'>86</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">25x</span>
@@ -171,11 +176,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
-<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">53x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -221,13 +227,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -263,12 +273,13 @@ function buildQuery(params) {
   return "?" + entries.map(([k, v]) =&gt; `${k}=${encodeURIComponent(v)}`).join("&amp;");
 }
 &nbsp;
-export async function getDepartures(params = {}) {
-  return apiFetch(`/flights/departures${buildQuery(params)}`);
+// search = número de vuelo, location = ciudad/aeropuerto
+export async function getDepartures({ date, type, airline, search, location } = {}) {
+  return apiFetch(`/flights/departures${buildQuery({ date, type, airline, search, location })}`);
 }
 &nbsp;
-export async function getArrivals(params = {}) {
-  return apiFetch(`/flights/arrivals${buildQuery(params)}`);
+export async function getArrivals({ date, type, airline, search, location } = {}) {
+  return apiFetch(`/flights/arrivals${buildQuery({ date, type, airline, search, location })}`);
 }
 &nbsp;
 export async function getFlightByCode(codigo) {
@@ -279,8 +290,8 @@ export async function searchByLocation(query, mode = "departures") {
   return apiFetch(`/flights/search${buildQuery({ q: query, mode })}`);
 }
 &nbsp;
-export async function getAirlines() {
-  return apiFetch("/airlines");
+export async function getAirlines(filtros = {}) {
+  return apiFetch(`/airlines${buildQuery({ date: filtros.date })}`);
 }
 &nbsp;
 export async function <span class="fstat-no" title="function not covered" >getRoutes(</span>) {
@@ -293,7 +304,7 @@ export async function login(username, password) {
     body: JSON.stringify({ username, password }),
   });
   localStorage.setItem("jfk_token", datos.token);
-  localStorage.setItem("jfk_user",  JSON.stringify(datos.user));
+  localStorage.setItem("jfk_user", JSON.stringify(datos.user));
   return datos;
 }
 &nbsp;
@@ -306,13 +317,17 @@ export async function logout() {
   }
 }
 &nbsp;
+const cargarDatos = <span class="fstat-no" title="function not covered" >async </span>() =&gt; {
+  const vuelos = <span class="cstat-no" title="statement not covered" >await api.getDepartures(filtros);</span>
+  const listaAero = <span class="cstat-no" title="statement not covered" >await api.getAirlines(filtros);</span> // Esta ahora sacará los datos de los vuelos
+<span class="cstat-no" title="statement not covered" >  setFlights(vuelos);</span>
+<span class="cstat-no" title="statement not covered" >  setAirlines(listaAero);</span>
+};
+&nbsp;
 export function getCurrentUser() {
   try {
-    const raw = localStorage.getItem("jfk_user");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-<span class="cstat-no" title="statement not covered" >    return null;</span>
-  }
+    return JSON.parse(localStorage.getItem("jfk_user"));
+  } catch { <span class="cstat-no" title="statement not covered" >return null; </span>}
 }
 &nbsp;
 export function isAMW() {
@@ -325,7 +340,7 @@ export function isAMW() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-21T01:59:31.037Z
+                at 2026-04-23T02:03:15.832Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

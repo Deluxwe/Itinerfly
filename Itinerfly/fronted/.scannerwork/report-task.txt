@@ -2,5 +2,5 @@ projectKey=itinerfly
 serverUrl=http://localhost:9000
 serverVersion=26.4.0.121862
 dashboardUrl=http://localhost:9000/dashboard?id=itinerfly
-ceTaskId=608e1914-d5e5-4d92-a154-72c4c2690df1
-ceTaskUrl=http://localhost:9000/api/ce/task?id=608e1914-d5e5-4d92-a154-72c4c2690df1
+ceTaskId=e5bd8901-6799-47d2-b6b8-a186a9f92596
+ceTaskUrl=http://localhost:9000/api/ce/task?id=e5bd8901-6799-47d2-b6b8-a186a9f92596

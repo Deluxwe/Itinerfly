@@ -37,15 +37,15 @@ app.get("/health", (req, res) => {
 
 app.use("/api/flights",  flightRoutes);
 app.use("/api/airlines", airlineRoutes);
-// Fix: /api/routes apunta al controlador de rutas directamente, no al de airlines
+// Fix: /api/routes apunta al controlador de rutas directamente
 app.use("/api/routes",   require("./src/routes/routeRoutes"));
 app.use("/api/auth",     authRoutes);
 
 app.use(notFoundHandler);
 app.use(globalErrorHandler);
 
-// Solo arrancar el servidor si NO estamos en modo test
-// En tests, supertest levanta el servidor en memoria
+
+
 if (config.nodeEnv !== "test") {
   app.listen(config.port, () => {
     console.log("\n╔══════════════════════════════════════════╗");

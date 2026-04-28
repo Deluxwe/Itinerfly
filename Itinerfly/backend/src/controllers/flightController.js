@@ -1,26 +1,41 @@
 const flightService = require("../services/flightAwareService");
 const { success, clientError, serverError } = require("../utils/responseHelpers");
-const { getNextDays } = require("../utils/dateHelpers");
 
-// La función esFechaValida debe estar ANTES de usarse
 function esFechaValida(str) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
   return !isNaN(new Date(str));
 }
 
+function getFechasValidas() {
+  const hoy = new Date();
+  return [0, 1, 2].map(n => {
+    const d  = new Date(hoy);
+    d.setDate(hoy.getDate() + n);
+    const y  = d.getFullYear();
+    const m  = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dd}`;
+  });
+}
+
 async function getDepartures(req, res) {
   try {
-    const { date, type, airline, search } = req.query;
+    const { date, type, airline, search, location } = req.query;
     if (date && !esFechaValida(date)) {
       return clientError(res, "Formato de fecha inválido. Usa YYYY-MM-DD.", 400);
     }
-    if (date && !getNextDays(3).includes(date)) {
+    if (date && !getFechasValidas().includes(date)) {
       return clientError(res, "Fecha fuera del rango permitido (máximo 2 días).", 400);
     }
     if (type && !["domestic", "international", "all"].includes(type)) {
-      return clientError(res, "Tipo inválido. Usa: domestic, international o all.", 400);
+      return clientError(res, "Tipo inválido.", 400);
     }
-    const vuelos = await flightService.getDepartures({ date, type, airlineId: airline, search });
+    const vuelos = await flightService.getDepartures({
+      date, type,
+      airlineId:      airline,
+      search:         search   || "",
+      locationSearch: location || "",
+    });
     return success(res, { mode: "departures", count: vuelos.length, flights: vuelos });
   } catch (err) {
     console.error("[getDepartures]", err.message);
@@ -30,17 +45,22 @@ async function getDepartures(req, res) {
 
 async function getArrivals(req, res) {
   try {
-    const { date, type, airline, search } = req.query;
+    const { date, type, airline, search, location } = req.query;
     if (date && !esFechaValida(date)) {
       return clientError(res, "Formato de fecha inválido. Usa YYYY-MM-DD.", 400);
     }
-    if (date && !getNextDays(3).includes(date)) {
+    if (date && !getFechasValidas().includes(date)) {
       return clientError(res, "Fecha fuera del rango permitido (máximo 2 días).", 400);
     }
     if (type && !["domestic", "international", "all"].includes(type)) {
-      return clientError(res, "Tipo inválido. Usa: domestic, international o all.", 400);
+      return clientError(res, "Tipo inválido.", 400);
     }
-    const vuelos = await flightService.getArrivals({ date, type, airlineId: airline, search });
+    const vuelos = await flightService.getArrivals({
+      date, type,
+      airlineId:      airline,
+      search:         search   || "",
+      locationSearch: location || "",
+    });
     return success(res, { mode: "arrivals", count: vuelos.length, flights: vuelos });
   } catch (err) {
     console.error("[getArrivals]", err.message);
@@ -55,7 +75,7 @@ async function searchByLocation(req, res) {
       return clientError(res, "La búsqueda necesita al menos 2 caracteres.", 400);
     }
     if (mode && !["departures", "arrivals"].includes(mode)) {
-      return clientError(res, "Modo inválido. Usa: departures o arrivals.", 400);
+      return clientError(res, "Modo inválido.", 400);
     }
     const resultados = await flightService.searchByLocation(q, mode || "departures");
     return success(res, { query: q, mode: mode || "departures", count: resultados.length, flights: resultados });
@@ -67,7 +87,7 @@ async function searchByLocation(req, res) {
 
 async function getFlightDetail(req, res) {
   try {
-    const codigo = req.params.flightCode.replaceAll(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    const codigo = req.params.flightCode.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
     if (codigo.length < 3 || codigo.length > 8) {
       return clientError(res, "Código de vuelo inválido.", 400);
     }

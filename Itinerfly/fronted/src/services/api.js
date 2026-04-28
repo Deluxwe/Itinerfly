@@ -1,12 +1,5 @@
-// ============================================================
-// src/services/api.js
-// Capa de comunicación con el backend Express.
-// Todos los componentes usan este archivo — nunca fetch directo.
-// ============================================================
-
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
-// ── Helper central de fetch ──────────────────────────────────
 async function apiFetch(ruta, opciones = {}) {
   const token = localStorage.getItem("jfk_token");
   const headers = {
@@ -27,7 +20,6 @@ async function apiFetch(ruta, opciones = {}) {
   }
 }
 
-// ── Query string builder ─────────────────────────────────────
 function buildQuery(params) {
   const entries = Object.entries(params).filter(
     ([, v]) => v !== undefined && v !== null && v !== "" && v !== "all"
@@ -36,13 +28,13 @@ function buildQuery(params) {
   return "?" + entries.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
 }
 
-// ── Vuelos ───────────────────────────────────────────────────
-export async function getDepartures(params = {}) {
-  return apiFetch(`/flights/departures${buildQuery(params)}`);
+// search = número de vuelo, location = ciudad/aeropuerto
+export async function getDepartures({ date, type, airline, search, location } = {}) {
+  return apiFetch(`/flights/departures${buildQuery({ date, type, airline, search, location })}`);
 }
 
-export async function getArrivals(params = {}) {
-  return apiFetch(`/flights/arrivals${buildQuery(params)}`);
+export async function getArrivals({ date, type, airline, search, location } = {}) {
+  return apiFetch(`/flights/arrivals${buildQuery({ date, type, airline, search, location })}`);
 }
 
 export async function getFlightByCode(codigo) {
@@ -53,15 +45,14 @@ export async function searchByLocation(query, mode = "departures") {
   return apiFetch(`/flights/search${buildQuery({ q: query, mode })}`);
 }
 
-export async function getAirlines() {
-  return apiFetch("/airlines");
+export async function getAirlines(filtros = {}) {
+  return apiFetch(`/airlines${buildQuery({ date: filtros.date })}`);
 }
 
 export async function getRoutes() {
   return apiFetch("/airlines/routes");
 }
 
-// ── Auth ─────────────────────────────────────────────────────
 export async function login(username, password) {
   const datos = await apiFetch("/auth/login", {
     method: "POST",
@@ -81,13 +72,17 @@ export async function logout() {
   }
 }
 
+const cargarDatos = async () => {
+  const vuelos = await api.getDepartures(filtros);
+  const listaAero = await api.getAirlines(filtros); // Esta ahora sacará los datos de los vuelos
+  setFlights(vuelos);
+  setAirlines(listaAero);
+};
+
 export function getCurrentUser() {
   try {
-    const raw = localStorage.getItem("jfk_user");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+    return JSON.parse(localStorage.getItem("jfk_user"));
+  } catch { return null; }
 }
 
 export function isAMW() {
