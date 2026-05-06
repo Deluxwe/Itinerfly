@@ -1,134 +1,134 @@
 # Itinerfly
 
-**Flight Itinerary Management System for John F. Kennedy International Airport (JFK)**
+**Sistema de Gestión de Itinerario de Vuelos para el Aeropuerto Internacional John F. Kennedy (JFK)**
 
-Itinerfly is a full-stack web application for tracking, managing, and visualizing real-time flight information at JFK Airport. It is built on a **Service-Oriented Architecture (SOA)** and integrates with the FlightAware AeroAPI to provide live data on departures, arrivals, airlines, and routes, with a fallback mock-data mode for development and academic use.
-
----
-
-## Table of Contents
-
-- [Architecture](#architecture)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Running the Application](#running-the-application)
-- [API Endpoints](#api-endpoints)
-- [Authentication](#authentication)
-- [Testing](#testing)
-- [Authors](#authors)
-- [License](#license)
+Itinerfly es una aplicación web full-stack para rastrear, gestionar y visualizar información de vuelos en tiempo real en el Aeropuerto JFK. Está construida sobre una **Arquitectura Orientada a Servicios (SOA)** e integra la AeroAPI de FlightAware para proveer datos en vivo de salidas, llegadas, aerolíneas y rutas, con un modo de datos simulados para desarrollo y uso académico.
 
 ---
 
-## Architecture
+## Tabla de Contenidos
 
-Itinerfly follows a **Service-Oriented Architecture (SOA)**, where business capabilities are exposed as independent, loosely coupled services that communicate over standard HTTP/JSON contracts.
+- [Arquitectura](#arquitectura)
+- [Funcionalidades](#funcionalidades)
+- [Stack Tecnológico](#stack-tecnológico)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Prerrequisitos](#prerrequisitos)
+- [Instalación](#instalación)
+- [Configuración](#configuración)
+- [Ejecutar la Aplicación](#ejecutar-la-aplicación)
+- [Endpoints de la API](#endpoints-de-la-api)
+- [Autenticación](#autenticación)
+- [Pruebas](#pruebas)
+- [Autores](#autores)
+- [Licencia](#licencia)
 
-### Architectural Principles
+---
 
-- **Loose coupling** — The frontend never talks directly to external providers. It consumes the backend's REST contract, which can swap its underlying data source (FlightAware live data or mock data) without any client-side change.
-- **Service abstraction** — Each domain (flights, airlines, routes, authentication) is exposed as an autonomous service with its own controller, route, and responsibility boundary.
-- **Reusability** — Services such as `flightAwareService` are consumed by multiple controllers (flights, airlines, routes) without duplicating logic.
-- **Standard contracts** — All services expose REST endpoints under `/api/*` and exchange data in JSON, allowing any client (web, mobile, third-party) to integrate.
-- **Statelessness** — Authentication is handled with stateless JWT tokens, so any service instance can serve any request, enabling horizontal scaling.
-- **Discoverability** — A `/health` endpoint advertises service status, mode (MOCK / LIVE), and configured airport.
+## Arquitectura
 
-### Identified Services
+Itinerfly sigue una **Arquitectura Orientada a Servicios (SOA)**, donde las capacidades del negocio se exponen como servicios independientes y débilmente acoplados que se comunican mediante contratos estándar HTTP/JSON.
 
-| Service         | Endpoint base   | Responsibility                                                  |
-|-----------------|-----------------|-----------------------------------------------------------------|
-| Flight Service  | `/api/flights`  | Departures, arrivals, search by location, and flight detail     |
-| Airline Service | `/api/airlines` | Airline catalog operating at JFK                                |
-| Route Service   | `/api/routes`   | Route catalog between origins and destinations                  |
-| Auth Service    | `/api/auth`     | Login, logout, and identity for the AMW role (JWT)              |
+### Principios Arquitectónicos
 
-### High-Level Data Flow
+- **Bajo acoplamiento** — El frontend nunca habla directamente con proveedores externos. Consume el contrato REST del backend, que puede cambiar su fuente de datos (FlightAware en vivo o datos simulados) sin ningún cambio del lado del cliente.
+- **Abstracción de servicios** — Cada dominio (vuelos, aerolíneas, rutas, autenticación) se expone como un servicio autónomo con su propio controlador, ruta y límite de responsabilidad.
+- **Reutilización** — Servicios como `flightAwareService` son consumidos por múltiples controladores sin duplicar lógica.
+- **Contratos estándar** — Todos los servicios exponen endpoints REST bajo `/api/*` e intercambian datos en JSON, permitiendo que cualquier cliente (web, móvil, terceros) se integre.
+- **Sin estado** — La autenticación se maneja con tokens JWT sin estado, de modo que cualquier instancia del servicio puede atender cualquier solicitud, habilitando el escalado horizontal.
+- **Descubribilidad** — Un endpoint `/health` informa el estado del servicio, el modo (MOCK / LIVE) y el aeropuerto configurado.
+
+### Servicios Identificados
+
+| Servicio          | Base del Endpoint | Responsabilidad                                                      |
+|-------------------|-------------------|----------------------------------------------------------------------|
+| Servicio de Vuelos | `/api/flights`   | Salidas, llegadas, búsqueda por ubicación y detalle de vuelo         |
+| Servicio de Aerolíneas | `/api/airlines` | Catálogo de aerolíneas que operan en JFK                        |
+| Servicio de Rutas | `/api/routes`    | Catálogo de rutas entre orígenes y destinos                          |
+| Servicio de Auth  | `/api/auth`      | Login, logout e identidad para el rol AMW (JWT)                      |
+
+### Flujo de Datos General
 
 ```
-[ React Frontend ]
+[ Frontend React ]
         |
         v   (HTTPS / JSON, Bearer JWT)
-[ API Gateway Layer ] -- Helmet, CORS, Rate Limiting, Auth Middleware
+[ Capa API Gateway ] -- Helmet, CORS, Rate Limiting, Middleware de Auth
         |
         v
-[ Service Layer ] -- Flights | Airlines | Routes | Auth
+[ Capa de Servicios ] -- Vuelos | Aerolíneas | Rutas | Auth
         |
         v
-[ Integration Layer ] -- flightAwareService (toggle: MOCK <-> LIVE)
+[ Capa de Integración ] -- flightAwareService (toggle: MOCK <-> LIVE)
         |
-        +--> Mock data store (in-memory, for academic / dev mode)
-        +--> FlightAware AeroAPI (live external provider)
+        +--> Almacén de datos simulados (en memoria, para modo dev / académico)
+        +--> FlightAware AeroAPI (proveedor externo en vivo)
 ```
 
-This separation between **presentation**, **service**, and **integration** layers is what allows the same frontend to operate against simulated data during development and against the live provider in production by flipping a single environment flag.
+Esta separación entre capas de **presentación**, **servicio** e **integración** es lo que permite que el mismo frontend opere con datos simulados durante el desarrollo y con el proveedor en vivo en producción, cambiando una sola variable de entorno.
 
 ---
 
-## Features
+## Funcionalidades
 
-- **Real-time flight tracking** — Live departures and arrivals at JFK powered by the FlightAware AeroAPI.
-- **Mock-data mode** — Switch to simulated data with a single environment variable, no API key required.
-- **Advanced filtering** — Filter flights by date, flight type (domestic / international), airline, and free-text search.
-- **Detailed flight view** — Inspect individual flight details by flight code.
-- **Airline and route catalog** — Browse the airlines operating at JFK and the routes they cover.
-- **Baggage information** — Modal with baggage policies and requirements.
-- **AMW role authentication** — Secure JWT-based login for Airport Management Workers.
-- **Production-grade security** — Helmet, CORS, rate limiting, and request size limits.
-- **High test coverage** — Unit and integration tests for both backend and frontend.
+- **Seguimiento de vuelos en tiempo real** — Salidas y llegadas en vivo en JFK mediante la AeroAPI de FlightAware.
+- **Modo de datos simulados** — Cambia a datos simulados con una sola variable de entorno, sin necesidad de API key.
+- **Filtrado avanzado** — Filtra vuelos por fecha, tipo (doméstico / internacional), aerolínea y búsqueda de texto libre.
+- **Vista detallada de vuelo** — Consulta el detalle de un vuelo individual por código de vuelo.
+- **Catálogo de aerolíneas y rutas** — Explora las aerolíneas que operan en JFK y las rutas que cubren.
+- **Información de equipaje** — Modal con políticas y requisitos de equipaje.
+- **Autenticación con rol AMW** — Login seguro basado en JWT para Trabajadores de Gestión Aeroportuaria.
+- **Seguridad de nivel productivo** — Helmet, CORS, limitación de tasa y límites de tamaño de solicitudes.
+- **Alta cobertura de pruebas** — Pruebas unitarias e integración para backend y frontend.
 
 ---
 
-## Tech Stack
+## Stack Tecnológico
 
 ### Backend
 - **Node.js** + **Express 4**
-- **Axios** — HTTP client for the FlightAware API
-- **JWT** (`jsonwebtoken`) + **bcryptjs** — Authentication and password hashing
-- **Helmet**, **CORS**, **express-rate-limit** — Security middleware
-- **Morgan** — HTTP request logging
-- **dotenv** — Environment variable management
-- **Vitest** + **Supertest** — Testing and coverage
-- **SonarQube** — Static code analysis
+- **Axios** — Cliente HTTP para la API de FlightAware
+- **JWT** (`jsonwebtoken`) + **bcryptjs** — Autenticación y hashing de contraseñas
+- **Helmet**, **CORS**, **express-rate-limit** — Middleware de seguridad
+- **Morgan** — Registro de solicitudes HTTP
+- **dotenv** — Gestión de variables de entorno
+- **Vitest** + **Supertest** — Pruebas y cobertura
+- **SonarQube** — Análisis estático de código
 
 ### Frontend
 - **React 18**
-- **Vite** — Build tool and dev server
+- **Vite** — Herramienta de construcción y servidor de desarrollo
 - **React Router DOM**
-- **Lucide React** — Icon library
-- **date-fns** — Date utilities
-- **Vitest** + **Testing Library** — Component and unit testing
+- **Lucide React** — Librería de íconos
+- **date-fns** — Utilidades de fechas
+- **Vitest** + **Testing Library** — Pruebas de componentes y unitarias
 
 ---
 
-## Project Structure
+## Estructura del Proyecto
 
 ```
 Itinerfly/
 ├── backend/
 │   ├── src/
-│   │   ├── config/         # Environment-variable loader
-│   │   ├── controllers/    # Business logic (flights, airlines, auth)
-│   │   ├── routes/         # Express routers
-│   │   ├── middleware/     # Auth, rate limiter, error handlers
-│   │   ├── services/       # FlightAware API integration
-│   │   ├── mock/           # Mock flight data
-│   │   ├── utils/          # Helpers (dates, responses)
-│   │   └── tests/          # Backend tests
-│   ├── server.js           # App entry point
+│   │   ├── config/         # Cargador de variables de entorno
+│   │   ├── controllers/    # Lógica de negocio (vuelos, aerolíneas, auth)
+│   │   ├── routes/         # Routers de Express
+│   │   ├── middleware/     # Auth, limitador de tasa, manejadores de errores
+│   │   ├── services/       # Integración con la API de FlightAware
+│   │   ├── mock/           # Datos de vuelos simulados
+│   │   ├── utils/          # Helpers (fechas, respuestas)
+│   │   └── tests/          # Pruebas del backend
+│   ├── server.js           # Punto de entrada de la aplicación
 │   └── package.json
 │
-├── fronted/                # (sic) Frontend
+├── fronted/                # Frontend
 │   ├── src/
-│   │   ├── components/     # UI components (flights, layout, widgets, baggage)
+│   │   ├── components/     # Componentes UI (vuelos, layout, widgets, equipaje)
 │   │   ├── Pages/          # Homepage, WidgetsPage
-│   │   ├── hooks/          # Custom React hooks (useFlights)
-│   │   ├── services/       # API client
-│   │   ├── data/           # Mock data
-│   │   └── tests/          # Frontend tests
+│   │   ├── hooks/          # Hooks personalizados de React (useFlights)
+│   │   ├── services/       # Cliente de la API
+│   │   ├── data/           # Datos simulados
+│   │   └── tests/          # Pruebas del frontend
 │   ├── index.html
 │   └── package.json
 │
@@ -137,20 +137,20 @@ Itinerfly/
 
 ---
 
-## Prerequisites
+## Prerrequisitos
 
 - **Node.js** >= 18.x
-- **npm** >= 9.x (or yarn / pnpm)
-- A **FlightAware AeroAPI key** *(optional — only needed for live data; mock mode works without it)*
+- **npm** >= 9.x (o yarn / pnpm)
+- Una **API key de FlightAware AeroAPI** *(opcional — solo necesaria para datos en vivo; el modo simulado funciona sin ella)*
 
 ---
 
-## Installation
+## Instalación
 
-Clone the repository and install dependencies for both apps:
+Clona el repositorio e instala las dependencias para ambas aplicaciones:
 
 ```bash
-git clone <repository-url>
+git clone 
 cd Itinerfly
 
 # Backend
@@ -164,43 +164,43 @@ npm install
 
 ---
 
-## Configuration
+## Configuración
 
 ### Backend (`backend/.env`)
 
-Create a `.env` file inside the `backend/` folder:
+Crea un archivo `.env` dentro de la carpeta `backend/`:
 
 ```env
-# Server
+# Servidor
 PORT=4000
 NODE_ENV=development
 
-# Mock / Live switch
+# Alternancia Mock / Live
 USE_MOCK_DATA=true
 
-# FlightAware (only required when USE_MOCK_DATA=false)
-FLIGHTAWARE_API_KEY=your_api_key_here
+# FlightAware (solo requerido cuando USE_MOCK_DATA=false)
+FLIGHTAWARE_API_KEY=tu_api_key_aqui
 FLIGHTAWARE_BASE_URL=https://aeroapi.flightaware.com/aeroapi
 
-# Airport (defaults to JFK)
+# Aeropuerto (por defecto JFK)
 AIRPORT_ICAO=KJFK
 AIRPORT_IATA=JFK
 
 # JWT
-JWT_SECRET=change_this_in_production
+JWT_SECRET=cambiar_en_produccion
 JWT_EXPIRES_IN=8h
 
 # CORS
 CORS_ORIGIN=http://localhost:3000
 
-# Rate limiting
+# Limitación de tasa
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX=100
 ```
 
 ### Frontend (`fronted/.env`)
 
-Optional — defaults to `http://localhost:4000/api` if omitted.
+Opcional — por defecto usa `http://localhost:4000/api` si se omite.
 
 ```env
 VITE_API_URL=http://localhost:4000/api
@@ -208,115 +208,115 @@ VITE_API_URL=http://localhost:4000/api
 
 ---
 
-## Running the Application
+## Ejecutar la Aplicación
 
 ### Backend
 
 ```bash
 cd backend
-npm run dev      # Development with auto-reload (nodemon)
-# or
-npm start        # Production mode
+npm run dev      # Desarrollo con recarga automática (nodemon)
+# o
+npm start        # Modo producción
 ```
 
-The API will be available at `http://localhost:4000`.
+La API estará disponible en `http://localhost:4000`.
 
 ### Frontend
 
 ```bash
 cd fronted
-npm start        # Vite dev server
-# or
-npm run build    # Production build
-npm run preview  # Preview the production build
+npm start        # Servidor de desarrollo Vite
+# o
+npm run build    # Construcción para producción
+npm run preview  # Vista previa de la construcción
 ```
 
-The web app will be available at the URL Vite reports (typically `http://localhost:5173`).
+La aplicación web estará disponible en la URL que reporte Vite (normalmente `http://localhost:5173`).
 
 ---
 
-## API Endpoints
+## Endpoints de la API
 
-### Health
-| Method | Endpoint  | Description |
+### Salud del Sistema
+| Método | Endpoint  | Descripción |
 |--------|-----------|-------------|
-| GET    | `/health` | Service status, mode (MOCK / LIVE), and configured airport |
+| GET    | `/health` | Estado del servicio, modo (MOCK / LIVE) y aeropuerto configurado |
 
-### Flights — `/api/flights`
-| Method | Endpoint                | Description |
+### Vuelos — `/api/flights`
+| Método | Endpoint                | Descripción |
 |--------|-------------------------|-------------|
-| GET    | `/departures`           | List of departing flights (filters: `date`, `type`, `airline`, `search`) |
-| GET    | `/arrivals`             | List of arriving flights (same filters as above) |
-| GET    | `/search?q=&mode=`      | Search flights by origin/destination location |
-| GET    | `/:flightCode`          | Detailed information for a specific flight |
+| GET    | `/departures`           | Lista de vuelos de salida (filtros: `date`, `type`, `airlineId`, `search`, `locationSearch`) |
+| GET    | `/arrivals`             | Lista de vuelos de llegada (mismos filtros) |
+| GET    | `/search?q=&mode=`      | Búsqueda de vuelos por ubicación de origen/destino |
+| GET    | `/:flightCode`          | Información detallada de un vuelo específico |
 
-### Airlines — `/api/airlines`
-| Method | Endpoint   | Description |
+### Aerolíneas — `/api/airlines`
+| Método | Endpoint   | Descripción |
 |--------|------------|-------------|
-| GET    | `/`        | List of airlines operating at JFK |
-| GET    | `/routes`  | List of available routes |
+| GET    | `/`        | Lista de aerolíneas que operan en JFK |
+| GET    | `/routes`  | Lista de rutas disponibles |
 
-### Routes — `/api/routes`
-| Method | Endpoint | Description |
+### Rutas — `/api/routes`
+| Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET    | `/`      | Direct access to the routes catalog |
+| GET    | `/`      | Acceso directo al catálogo de rutas |
 
-### Authentication — `/api/auth`
-| Method | Endpoint  | Description                                   |
-|--------|-----------|-----------------------------------------------|
-| POST   | `/login`  | Authenticate an AMW user, returns a JWT token |
-| POST   | `/logout` | Invalidate session *(requires auth)*          |
-| GET    | `/me`     | Current user info *(requires auth)*           |
-
----
-
-## Authentication
-
-Itinerfly implements a JWT-based authentication system for the **AMW** (Airport Management Worker) role.
-
-- Tokens are signed with **HS256** and include `issuer` and `audience` claims.
-- Default token lifetime: **8 hours** (configurable via `JWT_EXPIRES_IN`).
-- Passwords are hashed with **bcrypt**.
-- Login attempts are protected by a dedicated rate limiter to mitigate brute-force attacks.
-- Constant-time password comparison is used to prevent timing attacks.
-
-Default development credentials are seeded in `authController.js` for academic testing purposes — **these must be replaced before any non-academic deployment**.
+### Autenticación — `/api/auth`
+| Método | Endpoint  | Descripción                                          |
+|--------|-----------|------------------------------------------------------|
+| POST   | `/login`  | Autenticar un usuario AMW, retorna un token JWT      |
+| POST   | `/logout` | Invalidar sesión *(requiere autenticación)*          |
+| GET    | `/me`     | Información del usuario actual *(requiere auth)*     |
 
 ---
 
-## Testing
+## Autenticación
 
-Both modules ship with extensive automated tests.
+Itinerfly implementa un sistema de autenticación basado en JWT para el rol **AMW** (Trabajador de Gestión Aeroportuaria).
+
+- Los tokens se firman con **HS256** e incluyen claims de `issuer` y `audience`.
+- Tiempo de vida por defecto del token: **8 horas** (configurable mediante `JWT_EXPIRES_IN`).
+- Las contraseñas se hashean con **bcrypt**.
+- Los intentos de login están protegidos por un limitador de tasa dedicado para mitigar ataques de fuerza bruta.
+- Se usa comparación de contraseñas en tiempo constante para prevenir ataques de temporización.
+
+Las credenciales de desarrollo por defecto están sembradas en `authController.js` para pruebas académicas — **deben reemplazarse antes de cualquier despliegue no académico**.
+
+---
+
+## Pruebas
+
+Ambos módulos incluyen pruebas automatizadas extensas.
 
 ### Backend
 ```bash
 cd backend
-npm test                # Run the test suite
-npm run test:coverage   # Run tests + generate coverage report
+npm test                # Ejecutar la suite de pruebas
+npm run test:coverage   # Ejecutar pruebas y generar reporte de cobertura
 ```
 
 ### Frontend
 ```bash
 cd fronted
-npm test                # Run the test suite
-npm run test:coverage   # Run tests + generate coverage report
+npm test                # Ejecutar la suite de pruebas
+npm run test:coverage   # Ejecutar pruebas y generar reporte de cobertura
 ```
 
-Coverage reports are generated under each project's `coverage/` directory.
+Los reportes de cobertura se generan en el directorio `coverage/` de cada proyecto.
 
 ---
 
-## Authors
+## Autores
 
 - **Nicolás Martínez Betancourt**
 - **Juan Sebastián Gómez Franco**
 
 ---
 
-## License
+## Licencia
 
-This project is distributed under an **Academic License**.
+Este proyecto se distribuye bajo una **Licencia Académica**.
 
-It was developed for academic and educational purposes only. Redistribution, commercial use, or deployment in production environments is not permitted without the express written consent of the authors.
+Fue desarrollado únicamente para fines académicos y educativos. La redistribución, el uso comercial o el despliegue en entornos de producción no están permitidos sin el consentimiento expreso y por escrito de los autores.
 
-Copyright (c) 2026 — Nicolás Martínez Betancourt and Juan Sebastián Gómez Franco. All rights reserved.
+Copyright (c) 2026 — Nicolás Martínez Betancourt y Juan Sebastián Gómez Franco. Todos los derechos reservados.
