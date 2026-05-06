@@ -136,7 +136,7 @@ function filtrar(vuelos, opciones, mode) {
   const { date, type, airlineId, search, locationSearch } = opciones;
   const hoy = new Date();
   
-  // Solución 1: Usar un Set para mejorar rendimiento (SonarQube S7776)
+
   const fechasValidas = new Set([0, 1, 2].map(n => {
     const d = new Date(hoy);
     d.setDate(hoy.getDate() + n);
@@ -144,22 +144,20 @@ function filtrar(vuelos, opciones, mode) {
   }));
 
   return vuelos.filter(f => {
-    // 1. Obtener fecha y locación base
+
     const fv = fechaLocal(mode === "departures" ? f.scheduledOut : (f.scheduledIn || f.scheduledOut));
     const loc = mode === "departures" ? f.destination : f.origin;
 
-    // Solución 2: Reducir complejidad usando "Guard Clauses" más limpias (SonarQube S3776)
     if (!fv || !fechasValidas.has(fv)) return false;
     if (date && fv !== date) return false;
     
-    // Simplificamos las comparaciones de "all" y tipos
+
     if (type && type !== "all" && f.type !== type) return false;
     if (airlineId && airlineId !== "all" && f.airlineId !== airlineId) return false;
 
-    // Usamos Optional Chaining para búsqueda de texto
     if (search && !f.flightNumber?.toUpperCase().includes(search.toUpperCase())) return false;
 
-    // Para la búsqueda de locación, usamos .some() para que sea más legible
+
     if (locationSearch) {
       const q = locationSearch.toLowerCase().trim();
       const fields = [loc?.city, loc?.country, loc?.iata];
