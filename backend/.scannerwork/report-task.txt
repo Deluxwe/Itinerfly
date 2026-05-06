@@ -1,0 +1,6 @@
+projectKey=ItinerflyCalidad
+serverUrl=http://localhost:9000
+serverVersion=26.4.0.121862
+dashboardUrl=http://localhost:9000/dashboard?id=ItinerflyCalidad
+ceTaskId=55509127-7e22-4076-b760-f7737d2e8100
+ceTaskUrl=http://localhost:9000/api/ce/task?id=55509127-7e22-4076-b760-f7737d2e8100
