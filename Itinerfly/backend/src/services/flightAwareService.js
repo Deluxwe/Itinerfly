@@ -135,25 +135,38 @@ function fechaLocal(iso) {
 function filtrar(vuelos, opciones, mode) {
   const { date, type, airlineId, search, locationSearch } = opciones;
   const hoy = new Date();
-  const fechasValidas = [0,1,2].map(n => {
-    const d = new Date(hoy); d.setDate(hoy.getDate() + n);
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-  });
+  
+  // Solución 1: Usar un Set para mejorar rendimiento (SonarQube S7776)
+  const fechasValidas = new Set([0, 1, 2].map(n => {
+    const d = new Date(hoy);
+    d.setDate(hoy.getDate() + n);
+    return d.toISOString().split('T')[0]; // Más simple que concatenar manualmente
+  }));
 
   return vuelos.filter(f => {
-    const fv = fechaLocal(mode==="departures" ? f.scheduledOut : (f.scheduledIn||f.scheduledOut));
-    if (!fv || !fechasValidas.includes(fv)) return false;
+    // 1. Obtener fecha y locación base
+    const fv = fechaLocal(mode === "departures" ? f.scheduledOut : (f.scheduledIn || f.scheduledOut));
+    const loc = mode === "departures" ? f.destination : f.origin;
+
+    // Solución 2: Reducir complejidad usando "Guard Clauses" más limpias (SonarQube S3776)
+    if (!fv || !fechasValidas.has(fv)) return false;
     if (date && fv !== date) return false;
+    
+    // Simplificamos las comparaciones de "all" y tipos
     if (type && type !== "all" && f.type !== type) return false;
     if (airlineId && airlineId !== "all" && f.airlineId !== airlineId) return false;
+
+    // Usamos Optional Chaining para búsqueda de texto
     if (search && !f.flightNumber?.toUpperCase().includes(search.toUpperCase())) return false;
+
+    // Para la búsqueda de locación, usamos .some() para que sea más legible
     if (locationSearch) {
-      const q   = locationSearch.toLowerCase().trim();
-      const loc = mode==="departures" ? f.destination : f.origin;
-      if (!loc?.city?.toLowerCase().includes(q) &&
-          !loc?.country?.toLowerCase().includes(q) &&
-          !loc?.iata?.toLowerCase().includes(q)) return false;
+      const q = locationSearch.toLowerCase().trim();
+      const fields = [loc?.city, loc?.country, loc?.iata];
+      const matches = fields.some(field => field?.toLowerCase().includes(q));
+      if (!matches) return false;
     }
+
     return true;
   });
 }

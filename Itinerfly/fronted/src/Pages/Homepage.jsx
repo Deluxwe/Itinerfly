@@ -5,8 +5,11 @@ import FlightTable  from "../components/flights/FlightTable";
 import FlightDetail from "../components/flights/FlightDetail";
 
 function getFechaLocal() {
-  const h = new Date();
-  return `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,"0")}-${String(h.getDate()).padStart(2,"0")}`;
+  const d  = new Date();
+  const y  = d.getFullYear();
+  const m  = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
 }
 
 const LEGEND = [
@@ -21,14 +24,17 @@ export default function HomePage() {
   const [selected, setSelected] = useState(null);
   const [searchInput,   setSearchInput]   = useState("");
   const [locationInput, setLocationInput] = useState("");
+
   const [filtros, setFiltros] = useState({
-    date: getFechaLocal(), type:"all", airline:"all", search:"", location:"",
+    date:     getFechaLocal(), // fecha local correcta
+    type:     "all",
+    airline:  "all",
+    search:   "",
+    location: "",
   });
 
   const debounceSearch   = useRef(null);
   const debounceLocation = useRef(null);
-
-  // Carga aerolíneas y construye el mapa ID→nombre
   const { airlineMap, airlines } = useAirlineMap();
 
   function handleSearchChange(v) {
@@ -45,6 +51,12 @@ export default function HomePage() {
       setFiltros(p => ({ ...p, location: v })), 500);
   }
 
+  // Cuando cambia el modo, resetear la fecha a hoy
+  function handleModeChange(newMode) {
+    setMode(newMode);
+    setFiltros(p => ({ ...p, date: getFechaLocal() }));
+  }
+
   const { flights, loading, error, recargar } = useFlights(mode, filtros);
 
   return (
@@ -55,7 +67,11 @@ export default function HomePage() {
       <div className="mode-bar">
         <div className="mode-toggle">
           {[["departures","🛫","Salidas"],["arrivals","🛬","Llegadas"]].map(([id,icon,label]) => (
-            <button key={id} onClick={() => setMode(id)} className={`mode-btn${mode===id?" active":""}`}>
+            <button
+              key={id}
+              onClick={() => handleModeChange(id)}
+              className={`mode-btn${mode===id?" active":""}`}
+            >
               {icon} {label}
             </button>
           ))}
@@ -116,7 +132,13 @@ export default function HomePage() {
         </div>
       </div>
 
-      {selected && <FlightDetail flight={selected} airlineMap={airlineMap} onClose={() => setSelected(null)}/>}
+      {selected && (
+        <FlightDetail
+          flight={selected}
+          airlineMap={airlineMap}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </div>
   );
 }
