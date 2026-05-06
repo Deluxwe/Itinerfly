@@ -136,7 +136,6 @@ function filtrar(vuelos, opciones, mode) {
   const { date, type, airlineId, search, locationSearch } = opciones;
   const hoy = new Date();
   
-
   const fechasValidas = new Set([0, 1, 2].map(n => {
     const d = new Date(hoy);
     d.setDate(hoy.getDate() + n);

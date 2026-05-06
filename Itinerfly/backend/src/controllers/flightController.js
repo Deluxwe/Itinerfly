@@ -3,7 +3,8 @@ const { success, clientError, serverError } = require("../utils/responseHelpers"
 
 function esFechaValida(str) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
-  return !isNaN(new Date(str));
+  const fecha = new Date(str);
+  return !Number.isNaN(fecha.getTime());
 }
 
 // Genera fechas válidas en hora LOCAL del servidor
