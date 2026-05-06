@@ -13,15 +13,12 @@ const { clientError } = require("../utils/responseHelpers");
 function requireAuth(req, res, next) {
   const authHeader = req.headers["authorization"];
 
-  // Extraer token del header Authorization: Bearer <token>
   if (!authHeader?.startsWith("Bearer ")) {
     return clientError(res, "Token requerido.", 401);
   }
 
   const token = authHeader.split(" ")[1];
-
   try {
-    // Verificar firma y expiración
     req.user = jwt.verify(token, config.jwt.secret);
     next(); // Token válido → pasar al controlador
   } catch (err) {

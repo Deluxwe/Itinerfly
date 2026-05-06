@@ -3,7 +3,8 @@ const { success, clientError, serverError } = require("../utils/responseHelpers"
 
 function esFechaValida(str) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
-  return !isNaN(new Date(str));
+  const fecha = new Date(str);
+  return !Number.isNaN(fecha.getTime());
 }
 
 // Genera fechas válidas en hora LOCAL del servidor
@@ -104,13 +105,19 @@ async function searchByLocation(req, res) {
 
 async function getFlightDetail(req, res) {
   try {
-    const codigo = req.params.flightCode.replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
-    if (codigo.length < 3 || codigo.length > 8) {
+    const codigo = req.params.flightCode
+      ?.replaceAll(/[^a-zA-Z0-9]/g, "")
+      .toUpperCase();
+
+    if (!codigo || codigo.length < 3 || codigo.length > 8) {
       return clientError(res, "Código de vuelo inválido.", 400);
     }
-    const vuelo = await flightService.getFlightByCode(codigo);
-    if (!vuelo) return clientError(res, `Vuelo ${codigo} no encontrado.`, 404);
-    return success(res, { flight:vuelo });
+    const vuelo = await flightService.getFlightByCode(codigo);   
+    if (!vuelo) {
+      return clientError(res, `Vuelo ${codigo} no encontrado.`, 404);
+    }
+    return success(res, { flight: vuelo });
+
   } catch (err) {
     console.error("[getFlightDetail]", err.message);
     return serverError(res, err.message);
