@@ -131,29 +131,74 @@ function fechaLocal(iso) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
-// ── Filtrado ──────────────────────────────────────────────────
+// ── Funciones Auxiliares para Reducir Complejidad Cognitiva ──────────────────
+function cumpleFiltrosBasicos(f, fv, date, type, airlineId) {
+  if (date && fv !== date) return false;
+  if (type && type !== "all" && f.type !== type) return false;
+  if (airlineId && airlineId !== "all" && f.airlineId !== airlineId) return false;
+  return true;
+}
+
+function cumpleBusquedaTexto(f, search) {
+  if (!search) return true;
+  // Soporta ident_iata (API) o flightNumber (Mock)
+  const numeroVuelo = f.flightNumber || f.ident_iata || f.ident || "";
+  return numeroVuelo.toUpperCase().includes(search.toUpperCase());
+}
+
+function cumpleBusquedaUbicacion(f, locationSearch, mode) {
+  if (!locationSearch) return true;
+  
+  const q = locationSearch.toLowerCase().trim();
+  // Soporta la estructura anidada de la API o la normalizada del Mock
+  const loc = mode === "departures" ? (f.destination || {}) : (f.origin || {});
+  
+  const city = loc.city || "";
+  const country = loc.country || "";
+  const iata = loc.iata || loc.code_iata || loc.code || "";
+  
+  return (
+    city.toLowerCase().includes(q) ||
+    country.toLowerCase().includes(q) ||
+    iata.toLowerCase().includes(q)
+  );
+}
+
+// ── Función de Filtrado Principal ─────────────────────────────────────────────
 function filtrar(vuelos, opciones, mode) {
   const { date, type, airlineId, search, locationSearch } = opciones;
-  const hoy = new Date();
-  const fechasValidas = [0,1,2].map(n => {
-    const d = new Date(hoy); d.setDate(hoy.getDate() + n);
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  
+  // 1. Obtener 'Hoy' de forma segura y clavar el reloj a medianoche LOCAL
+  const ahora = new Date();
+  const hoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0, 0);
+  
+  // 2. Crear las fechas permitidas de forma manual estricta
+  const fechasArray = [0, 1, 2].map(n => {
+    const d = new Date(hoy); 
+    d.setDate(hoy.getDate() + n); // Al estar en 00:00:00, sumar días nunca saltará de más
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dd}`;
   });
 
+  // Mantén el resto de tu código igual (el Set, los console.log y el return vuelos.filter...)
+  const fechasValidas = new Set(fechasArray);
+
+  console.log('[filtrar] Fechas generadas en Backend:', fechasArray);
+  console.log('[filtrar] Fecha solicitada por Query (?date=):', date);
+
   return vuelos.filter(f => {
-    const fv = fechaLocal(mode==="departures" ? f.scheduledOut : (f.scheduledIn||f.scheduledOut));
-    if (!fv || !fechasValidas.includes(fv)) return false;
-    if (date && fv !== date) return false;
-    if (type && type !== "all" && f.type !== type) return false;
-    if (airlineId && airlineId !== "all" && f.airlineId !== airlineId) return false;
-    if (search && !f.flightNumber?.toUpperCase().includes(search.toUpperCase())) return false;
-    if (locationSearch) {
-      const q   = locationSearch.toLowerCase().trim();
-      const loc = mode==="departures" ? f.destination : f.origin;
-      if (!loc?.city?.toLowerCase().includes(q) &&
-          !loc?.country?.toLowerCase().includes(q) &&
-          !loc?.iata?.toLowerCase().includes(q)) return false;
-    }
+    const isoString = mode === "departures" ? f.scheduledOut : (f.scheduledIn || f.scheduledOut);
+    const fv = fechaLocal(isoString);
+    
+    if (!fv) return false;
+
+    // Aplicar las sub-validaciones modulares (SonarQube S3776 OK)
+    if (!cumpleFiltrosBasicos(f, fv, date, type, airlineId)) return false;
+    if (!cumpleBusquedaTexto(f, search)) return false;
+    if (!cumpleBusquedaUbicacion(f, locationSearch, mode)) return false;
+
     return true;
   });
 }

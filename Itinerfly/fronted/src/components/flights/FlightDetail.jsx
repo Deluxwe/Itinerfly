@@ -1,9 +1,22 @@
 import React from "react";
 import FlightStatusBadge from "./FlightStatusBadge";
 
-const fmtDT = (iso) => iso
-  ? new Date(iso).toLocaleString("es-ES",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",hour12:false})
-  : "—";
+const fmtDT = (iso) => {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("es-ES", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "America/New_York" // Fija la visualización a la hora del aeropuerto JFK
+    });
+  } catch (e) {
+    return "—";
+  }
+};
 
 function Row({ label, value, mono }) {
   return (
@@ -17,6 +30,10 @@ function Row({ label, value, mono }) {
 export default function FlightDetail({ flight, airlineMap, onClose }) {
   if (!flight) return null;
   const alNombre = airlineMap?.[flight.airlineId] || flight.airlineId || flight.airline || "—";
+  const esSalida = flight.origin?.iata === "JFK"; 
+
+  const programado = esSalida ? flight.scheduledOut : (flight.scheduledIn || flight.scheduledOut);
+  const estimado = esSalida ? flight.estimatedOut : (flight.estimatedIn || flight.estimatedOut);
 
   return (
     <div className="detail-overlay" onClick={onClose}>
@@ -67,8 +84,8 @@ export default function FlightDetail({ flight, airlineMap, onClose }) {
           <Row label="Tipo de vuelo"     value={flight.type==="domestic"?"Nacional":"Internacional"}/>
           <Row label="Origen"            value={`${flight.origin?.iata} — ${flight.origin?.city}`}/>
           <Row label="Destino"           value={`${flight.destination?.iata} — ${flight.destination?.city}`}/>
-          <Row label="Hora programada"   value={fmtDT(flight.scheduledOut)} mono/>
-          <Row label="Hora estimada"     value={fmtDT(flight.estimatedOut)} mono/>
+          <Row label={esSalida ? "Hora programada" : "Llegada programada"} value={fmtDT(programado)} mono/>
+          <Row label={esSalida ? "Hora estimada" : "Llegada estimada"}     value={fmtDT(estimado)} mono/>
           <Row label="Puerta"            value={flight.gate}  mono/>
           <Row label="Terminal"          value={flight.terminal}/>
           <Row label="Matrícula"         value={flight.registration} mono/>
